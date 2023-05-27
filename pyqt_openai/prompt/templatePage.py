@@ -2,14 +2,14 @@ from qtpy.QtWidgets import QWidget, QDialog, QTableWidget, QVBoxLayout, QHBoxLay
 from qtpy.QtCore import Signal, Qt
 
 from pyqt_openai.inputDialog import InputDialog
-from pyqt_openai.sqlite import SqliteDatabase
+from pyqt_openai.pgsql import PGDatabase
 from pyqt_openai.svgButton import SvgButton
 
 
 class TemplatePage(QWidget):
     updated = Signal(str, str)
 
-    def __init__(self, db: SqliteDatabase):
+    def __init__(self, db: PGDatabase):
         super().__init__()
         self.__initVal(db)
         self.__initUi()

@@ -1,18 +1,19 @@
-import platform, subprocess
+import platform
+import subprocess
 
-from qtpy.QtGui import QFont
-from qtpy.QtWidgets import QWidget, QComboBox, QTextEdit, QLabel, QVBoxLayout, QApplication, QCheckBox, QDoubleSpinBox, \
-    QSpinBox, QFormLayout, QHBoxLayout, QFileDialog, QPushButton, QLineEdit, QGroupBox
 from qtpy.QtCore import Qt, QSettings
+from qtpy.QtGui import QFont
+from qtpy.QtWidgets import QWidget, QComboBox, QLabel, QVBoxLayout, QCheckBox, QDoubleSpinBox, \
+    QSpinBox, QFormLayout, QHBoxLayout, QFileDialog, QPushButton, QLineEdit, QGroupBox
 
-from pyqt_openai.apiData import getCompletionModel, getLatestModel
+from pyqt_openai.apiData import getCompletionModel
 from pyqt_openai.modelTable import ModelTable
-from pyqt_openai.sqlite import SqliteDatabase
+from pyqt_openai.pgsql import PGDatabase
 from pyqt_openai.svgLabel import SvgLabel
 
 
 class CompletionPage(QWidget):
-    def __init__(self, db: SqliteDatabase, ini_etc_dict, model_data):
+    def __init__(self, db: PGDatabase, ini_etc_dict, model_data):
         super().__init__()
         self.__initVal(db, ini_etc_dict, model_data)
         self.__initUi()

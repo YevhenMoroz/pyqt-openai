@@ -3,11 +3,11 @@ from qtpy.QtWidgets import QTextBrowser, QWidget, QLabel, QVBoxLayout, QPushButt
 
 from pyqt_openai.prompt.propPage import PropPage
 from pyqt_openai.prompt.templatePage import TemplatePage
-from pyqt_openai.sqlite import SqliteDatabase
+from pyqt_openai.pgsql import PGDatabase
 
 
 class PromptGeneratorWidget(QScrollArea):
-    def __init__(self, db: SqliteDatabase):
+    def __init__(self, db: PGDatabase):
         super().__init__()
         self.__initVal(db)
         self.__initUi()

@@ -3,11 +3,11 @@ from qtpy.QtWidgets import QScrollArea, QWidget, QTabWidget, QGridLayout
 
 from pyqt_openai.right_sidebar.chatPage import ChatPage
 from pyqt_openai.right_sidebar.completionPage import CompletionPage
-from pyqt_openai.sqlite import SqliteDatabase
+from pyqt_openai.pgsql import PGDatabase
 
 
 class AIPlaygroundWidget(QScrollArea):
-    def __init__(self, db: SqliteDatabase, ini_etc_dict, model_data):
+    def __init__(self, db: PGDatabase, ini_etc_dict, model_data):
         super().__init__()
         self.__initVal(db, ini_etc_dict, model_data)
         self.__initUi()

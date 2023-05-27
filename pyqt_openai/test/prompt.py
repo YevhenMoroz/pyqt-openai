@@ -1,12 +1,10 @@
 import sys
 
-from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QTableView, QHeaderView, QAbstractItemView, QTableWidget, QTableWidgetItem
-from qtpy.QtWidgets import QApplication, QMainWindow, QTextEdit, QVBoxLayout, QWidget, QCompleter
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QTextCursor
+from qtpy.QtWidgets import QApplication, QMainWindow, QTextEdit, QVBoxLayout, QWidget, QCompleter
 
-from pyqt_openai.sqlite import SqliteDatabase
+from pyqt_openai.pgsql import PGDatabase
 
 
 class AutoCompleteTextEdit(QTextEdit):
@@ -85,7 +83,7 @@ class AutoCompleteTextEdit(QTextEdit):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.__db = SqliteDatabase()
+        self.__db = PGDatabase()
 
         self.text_edit = AutoCompleteTextEdit()
         self.init_autocomplete()

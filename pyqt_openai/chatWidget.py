@@ -1,9 +1,9 @@
 from qtpy.QtCore import Qt, Signal
-from qtpy.QtGui import QFont, QTextCursor
+from qtpy.QtGui import QFont
 from qtpy.QtWidgets import QScrollArea, QCompleter, QVBoxLayout, QToolButton, QMenu, QAction, QWidget, QLabel, \
     QHBoxLayout, QTextEdit, QStackedWidget
 
-from pyqt_openai.sqlite import SqliteDatabase
+from pyqt_openai.pgsql import PGDatabase
 from pyqt_openai.svgToolButton import SvgToolButton
 
 
@@ -145,7 +145,7 @@ class ChatBrowser(QScrollArea):
 class TextEditPrompt(QTextEdit):
     returnPressed = Signal()
 
-    def __init__(self, db: SqliteDatabase):
+    def __init__(self, db: PGDatabase):
         super().__init__()
         self.__initVal(db)
         self.__initUi()
@@ -232,7 +232,7 @@ class TextEditPrompt(QTextEdit):
 class TextEditPropmtGroup(QWidget):
     textChanged = Signal()
 
-    def __init__(self, db: SqliteDatabase):
+    def __init__(self, db: PGDatabase):
         super().__init__()
         self.__initVal(db)
         self.__initUi()
@@ -303,7 +303,7 @@ class TextEditPropmtGroup(QWidget):
 
 
 class Prompt(QWidget):
-    def __init__(self, db: SqliteDatabase):
+    def __init__(self, db: PGDatabase):
         super().__init__()
         self.__initVal(db)
         self.__initUi()

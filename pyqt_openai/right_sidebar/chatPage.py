@@ -2,11 +2,11 @@ from qtpy.QtWidgets import QWidget, QComboBox, QTextEdit, QLabel, QVBoxLayout, Q
     QSpinBox, QPushButton
 
 from pyqt_openai.apiData import getChatModel
-from pyqt_openai.sqlite import SqliteDatabase
+from pyqt_openai.pgsql import PGDatabase
 
 
 class ChatPage(QWidget):
-    def __init__(self, db: SqliteDatabase, ini_etc_dict):
+    def __init__(self, db: PGDatabase, ini_etc_dict):
         super().__init__()
         self.__initVal(db, ini_etc_dict)
         self.__initUi()

@@ -1,10 +1,10 @@
 from qtpy.QtCore import Signal, Qt
-from qtpy.QtWidgets import QTableWidget, QSizePolicy, QPushButton, QSpacerItem, QStackedWidget, QLabel, \
+from qtpy.QtWidgets import QTableWidget, QSizePolicy, QSpacerItem, QStackedWidget, QLabel, \
     QAbstractItemView, QTableWidgetItem, QHeaderView, QHBoxLayout, \
-    QVBoxLayout, QWidget, QDialog, QListWidget, QListWidgetItem, QApplication, QSplitter
+    QVBoxLayout, QWidget, QDialog, QListWidget, QListWidgetItem, QSplitter
 
 from pyqt_openai.inputDialog import InputDialog
-from pyqt_openai.sqlite import SqliteDatabase
+from pyqt_openai.pgsql import PGDatabase
 from pyqt_openai.svgButton import SvgButton
 
 
@@ -13,7 +13,7 @@ class PropGroupList(QWidget):
     deleted = Signal(int)
     currentRowChanged = Signal(int)
 
-    def __init__(self, db: SqliteDatabase):
+    def __init__(self, db: PGDatabase):
         super().__init__()
         self.__initVal(db)
         self.__initUi()
@@ -93,7 +93,7 @@ class PropTable(QWidget):
     """
     updated = Signal(str)
 
-    def __init__(self, db: SqliteDatabase, id):
+    def __init__(self, db: PGDatabase, id):
         super().__init__()
         self.__initVal(db, id)
         self.__initUi()
@@ -209,7 +209,7 @@ class PropTable(QWidget):
 class PropPage(QWidget):
     updated = Signal(str)
 
-    def __init__(self, db: SqliteDatabase):
+    def __init__(self, db: PGDatabase):
         super().__init__()
         self.__initVal(db)
         self.__initUi()

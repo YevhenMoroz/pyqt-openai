@@ -2,8 +2,7 @@ import json
 import os
 import webbrowser
 
-from qtpy.QtCore import Qt, QSettings, QEvent, Signal
-from qtpy.QtGui import QCursor
+from qtpy.QtCore import Qt, QSettings, Signal
 from qtpy.QtWidgets import QHBoxLayout, QWidget, QSizePolicy, QVBoxLayout, QFrame, QSplitter, \
     QListWidgetItem, QFileDialog
 
@@ -12,9 +11,9 @@ from pyqt_openai.chatWidget import Prompt, ChatBrowser
 from pyqt_openai.leftSideBar import LeftSideBar
 from pyqt_openai.notifier import NotifierWidget
 from pyqt_openai.openAiThread import OpenAIThread
+from pyqt_openai.pgsql import PGDatabase
 from pyqt_openai.prompt.promptGeneratorWidget import PromptGeneratorWidget
 from pyqt_openai.right_sidebar.aiPlaygroundWidget import AIPlaygroundWidget
-from pyqt_openai.sqlite import SqliteDatabase
 from pyqt_openai.svgButton import SvgButton
 
 
@@ -28,7 +27,7 @@ class OpenAIChatBotWidget(QWidget):
 
     def __initVal(self):
         # db
-        self.__db = SqliteDatabase()
+        self.__db = PGDatabase()
 
         # managing with ini file or something else
         self.__ini_etc_dict = {}
