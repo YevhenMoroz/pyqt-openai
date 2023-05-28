@@ -1,10 +1,12 @@
-import json
-import shutil
-
-import psycopg2
+import psycopg2, json, shutil
 
 
 class PGDatabase:
+    """
+    functions which only meant to be used frequently are defined.
+
+    if there is no functions you want to use, use ``getCursor`` instead
+    """
     def __init__(self):
         super().__init__()
         self.__initVal()
@@ -81,24 +83,24 @@ class PGDatabase:
         self.__template_prompt_default_value = [
             {'name': 'Sample 1',
              'text': 'Identify the 20% of [topic or skill] that will yield 80% of the desired results and provide a focused learning plan to master it.'},
-             {'name': 'Sample 2',
-              'text': 'Explain [topic or skill] in the simplest terms possible as if teaching it to a complete beginner. Identify gaps in my understanding and suggest resources to fill them.'},
-              {'name': 'Sample 3',
-               'text': 'Create a study plan that mixes different topics or skills within [subject area] to help me develop a more robust understanding and facilitate connections between them.'},
-               {'name': 'Sample 4',
-                'text': 'Design a spaced repetition schedule for me to effectively review [topic or skill] over time, ensuring better retention and recall.'},
-                {'name': 'Sample 5',
-                 'text': 'Help me create mental models or analogies to better understand and remember key concepts in [topic or skill].'},
-                 {'name': 'Sample 6',
-                  'text': 'Suggest various learning resources (e.g., videos, books, podcasts, interactive exercises) for [topic or skill] that cater to different learning styles.'},
-                  {'name': 'Sample 7',
-                   'text': 'Provide me with a series of challenging questions or problems related to [topic or skill] to test my understanding and improve long-term retention.'},
-                   {'name': 'Sample 8',
-                    'text': 'Transform key concepts or lessons from [topic or skill] into engaging stories or narratives to help me better remember and understand the material.'},
-                    {'name': 'Sample 9',
-                     'text': 'Design a deliberate practice routine for [topic or skill], focusing on my weaknesses and providing regular feedback for improvement.'},
-                     {'name': 'Sample 10',
-                      'text': 'Guide me through a visualization exercise to help me internalize [topic or skill] and imagine myself succesfully applying it in real-life situations.'}
+            {'name': 'Sample 2',
+             'text': 'Explain [topic or skill] in the simplest terms possible as if teaching it to a complete beginner. Identify gaps in my understanding and suggest resources to fill them.'},
+            {'name': 'Sample 3',
+             'text': 'Create a study plan that mixes different topics or skills within [subject area] to help me develop a more robust understanding and facilitate connections between them.'},
+            {'name': 'Sample 4',
+             'text': 'Design a spaced repetition schedule for me to effectively review [topic or skill] over time, ensuring better retention and recall.'},
+            {'name': 'Sample 5',
+             'text': 'Help me create mental models or analogies to better understand and remember key concepts in [topic or skill].'},
+            {'name': 'Sample 6',
+             'text': 'Suggest various learning resources (e.g., videos, books, podcasts, interactive exercises) for [topic or skill] that cater to different learning styles.'},
+            {'name': 'Sample 7',
+             'text': 'Provide me with a series of challenging questions or problems related to [topic or skill] to test my understanding and improve long-term retention.'},
+            {'name': 'Sample 8',
+             'text': 'Transform key concepts or lessons from [topic or skill] into engaging stories or narratives to help me better remember and understand the material.'},
+            {'name': 'Sample 9',
+             'text': 'Design a deliberate practice routine for [topic or skill], focusing on my weaknesses and providing regular feedback for improvement.'},
+            {'name': 'Sample 10',
+             'text': 'Guide me through a visualization exercise to help me internalize [topic or skill] and imagine myself succesfully applying it in real-life situations.'}
         ]
 
     def __initDb(self):
@@ -110,6 +112,7 @@ class PGDatabase:
                                            password="1111",
                                            port="5432")
 
+            self.__conn.autocommit = True
             self.__c = self.__conn.cursor()
             self.__createInfo()
         except psycopg2.Error as e:
@@ -118,7 +121,9 @@ class PGDatabase:
 
     def __createChat(self):
         # Check if the table exists
-        self.__c.execute(f"SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{self.__info_tb_nm}';")
+        self.__c.execute(f'''SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE table_type = 'BASE TABLE'
+          AND table_schema = 'public'
+          AND table_name = '{self.__info_tb_nm}';''')
         if self.__c.fetchone()[0] == 1:
             # Check if each column already exists in the table
             self.__c.execute(f"SELECT column_name FROM information_schema.columns WHERE table_name='{self.__info_tb_nm}';")
@@ -137,7 +142,7 @@ class PGDatabase:
                                      (id SERIAL PRIMARY KEY,
                                       engine VARCHAR(50) DEFAULT '{self.__chat_default_value['engine']}',
                                       system TEXT DEFAULT '{self.__chat_default_value['system']}',
-                                      temperature INTEGER DEFAULT {self.__chat_default_value['temperature']},
+                                      temperature FLOAT DEFAULT {self.__chat_default_value['temperature']},
                                       max_tokens INTEGER DEFAULT {self.__chat_default_value['max_tokens']},
                                       top_p INTEGER DEFAULT {self.__chat_default_value['top_p']},
                                       frequency_penalty INTEGER DEFAULT {self.__chat_default_value['frequency_penalty']},
@@ -162,10 +167,9 @@ class PGDatabase:
                                                 presence_penalty,
                                                 stream
                                             ) VALUES
-                                            (
-                                                {','.join(['?' for _ in range(len(self.__chat_default_value))])}
-                                            )
-                                         ''', tuple(self.__chat_default_value.values()))
+                                               {tuple(self.__chat_default_value.values())}
+                                         ''')
+            # self.__conn.commit()
 
     def __createCompletion(self):
         # Check if the table exists
@@ -175,7 +179,7 @@ class PGDatabase:
             self.__c.execute(f'''CREATE TABLE {self.__completion_info_tb_nm}
                                              (id SERIAL PRIMARY KEY,
                                               engine VARCHAR(50) DEFAULT '{self.__completion_default_value['engine']}',
-                                              temperature INTEGER DEFAULT {self.__completion_default_value['temperature']},
+                                              temperature FLOAT DEFAULT {self.__completion_default_value['temperature']},
                                               max_tokens INTEGER DEFAULT {self.__completion_default_value['max_tokens']},
                                               top_p INTEGER DEFAULT {self.__completion_default_value['top_p']},
                                               frequency_penalty INTEGER DEFAULT {self.__completion_default_value['frequency_penalty']},
@@ -197,14 +201,16 @@ class PGDatabase:
                                                         frequency_penalty,
                                                         presence_penalty
                                                     ) VALUES
-                                                    (
-                                                        {','.join(['?' for _ in range(len(self.__completion_default_value))])}
-                                                    )
-                                                 ''', tuple(self.__completion_default_value.values()))
+                                                        {tuple(self.__completion_default_value.values())}
+                                                 ''')
+            # self.__conn.commit()
 
     def __createPropPromptGroup(self):
         self.__c.execute(
-            f"SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{self.__prop_prompt_group_tb_nm}'")
+            f'''SELECT COUNT(*) FROM information_schema.tables WHERE table_type = 'BASE TABLE'
+            AND table_schema = 'public'
+            AND table_name = '{self.__prop_prompt_group_tb_nm}';
+            ''')
         if self.__c.fetchone()[0] != 1:
             self.__c.execute(f'''CREATE TABLE {self.__prop_prompt_group_tb_nm}
                                                  (id SERIAL PRIMARY KEY,
@@ -220,7 +226,9 @@ class PGDatabase:
 
     def createDefaultPropPromptAttributes(self, id_fk):
         self.__c.execute(
-            f"SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{self.__prop_prompt_unit_tb_nm}{id_fk}'")
+            f'''SELECT COUNT(*) FROM information_schema.tables WHERE table_type = 'BASE TABLE'
+          AND table_schema = 'public'
+          AND table_name = '{self.__prop_prompt_unit_tb_nm}{id_fk}';''')
         if self.__c.fetchone()[0] != 1:
             self.__c.execute(f'''CREATE TABLE {self.__prop_prompt_unit_tb_nm}{id_fk}
                                                              (id SERIAL PRIMARY KEY,
@@ -231,6 +239,7 @@ class PGDatabase:
                                                               insert_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                                               FOREIGN KEY (id_fk) REFERENCES {self.__prop_prompt_group_tb_nm}(id)
                                                               ON DELETE CASCADE)''')
+            self.__conn.commit()
 
         # insert default property group
         for obj in self.__prop_prompt_unit_default_value:
@@ -252,13 +261,14 @@ class PGDatabase:
     def insertPropPromptAttribute(self, id, name):
         try:
             # Insert a row into the table
-            self.__c.execute(f"INSERT INTO {self.__prop_prompt_unit_tb_nm}{id} (id_fk, name) VALUES ('{id}', '{name}')")
-            new_id = self.__c.lastrowid
+            self.__c.execute(f"INSERT INTO {self.__prop_prompt_unit_tb_nm}{id} (id_fk, name) VALUES ('{id}', '{name}') RETURNING id;")
+            # new_id = self.__c.lastrowid
+            new_id = self.__c.fetchone()[0]
             # Commit the transaction
             self.__conn.commit()
             return new_id
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with insertPropPromptAttribute: {e}")
             raise
 
     def updatePropPromptAttribute(self, p_id, id, name, text):
@@ -266,7 +276,7 @@ class PGDatabase:
             self.__c.execute(f"UPDATE {self.__prop_prompt_unit_tb_nm}{p_id} SET name='{name}', text='{text}' WHERE id={id}")
             self.__conn.commit()
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with updatePropPromptAttribute: {e}")
             raise
 
     def deletePropPromptAttribute(self, p_id, id):
@@ -274,7 +284,7 @@ class PGDatabase:
             self.__c.execute(f'DELETE FROM {self.__prop_prompt_unit_tb_nm}{p_id} WHERE id={id}')
             self.__conn.commit()
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with deletePropPromptAttribute: {e}")
             raise
 
     def selectPropPromptGroup(self):
@@ -282,7 +292,7 @@ class PGDatabase:
             self.__c.execute(f'SELECT * FROM {self.__prop_prompt_group_tb_nm}')
             return self.__c.fetchall()
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with selectPropPromptGroup: {e}")
             raise
 
     def selectPropPromptGroupId(self, id):
@@ -290,14 +300,15 @@ class PGDatabase:
             self.__c.execute(f'SELECT * FROM {self.__prop_prompt_group_tb_nm} WHERE id={id}')
             return self.__c.fetchone()
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with selectPropPromptGroupId: {e}")
             raise
 
     def insertPropPromptGroup(self, name):
         try:
             # Insert a row into the table
-            self.__c.execute(f"INSERT INTO {self.__prop_prompt_group_tb_nm} (name) VALUES ('{name}')")
-            new_id = self.__c.lastrowid
+            self.__c.execute(f"INSERT INTO {self.__prop_prompt_group_tb_nm} (name) VALUES ('{name}') RETURNING id;")
+            # new_id = self.__c.lastrowid
+            new_id = self.__c.fetchone()[0]
             # Commit the transaction
             self.__conn.commit()
             # insert default attributes
@@ -305,7 +316,7 @@ class PGDatabase:
             # TODO abcd make others insert statement return like this
             return new_id
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with insertPropPromptGroup: {e}")
             raise
 
     def updatePropPromptGroup(self, id, name):
@@ -313,7 +324,7 @@ class PGDatabase:
             self.__c.execute(f"UPDATE {self.__prop_prompt_group_tb_nm} SET name=('{name}') WHERE id={id}")
             self.__conn.commit()
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with : {e}")
             raise
 
     def deletePropPromptGroup(self, id):
@@ -321,12 +332,17 @@ class PGDatabase:
             self.__c.execute(f'DELETE FROM {self.__prop_prompt_group_tb_nm} WHERE id={id}')
             self.__conn.commit()
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with : {e}")
             raise
 
     def __createTemplatePrompt(self):
         self.__c.execute(
-            f"SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{self.__template_prompt_tb_nm}'")
+            f'''SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_type = 'BASE TABLE'
+              AND table_schema = 'public'
+              AND table_name = '{self.__template_prompt_tb_nm}';
+            ''')
         if self.__c.fetchone()[0] != 1:
             self.__c.execute(f'''CREATE TABLE {self.__template_prompt_tb_nm}
                                                  (id SERIAL PRIMARY KEY,
@@ -348,27 +364,29 @@ class PGDatabase:
             self.__c.execute(f'SELECT * FROM {self.__template_prompt_tb_nm}')
             return self.__c.fetchall()
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with selectTemplatePrompt: {e}")
             raise
 
     def insertTemplatePrompt(self, name):
         try:
             # Insert a row into the table
-            self.__c.execute(f"INSERT INTO {self.__template_prompt_tb_nm} (name, text) VALUES ('{name}', '')")
-            new_id = self.__c.lastrowid
+            self.__c.execute(f"INSERT INTO {self.__template_prompt_tb_nm} (name, text) VALUES ('{name}', '') RETURNING id;")
+            # new_id = self.__c.lastrowid
+            new_id = self.__c.fetchone()[0]
             # Commit the transaction
             self.__conn.commit()
             return new_id
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with insertTemplatePrompt: {e}")
             raise
 
     def updateTemplatePrompt(self, id, name, text):
         try:
-            self.__c.execute(f"UPDATE {self.__template_prompt_tb_nm} SET name=('{name}'), text=('{text}') WHERE id={id}")
+            self.__c.execute(
+                f"UPDATE {self.__template_prompt_tb_nm} SET name=('{name}'), text=('{text}') WHERE id={id}")
             self.__conn.commit()
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with updateTemplatePrompt: {e}")
             raise
 
     def deleteTemplatePrompt(self, id):
@@ -376,7 +394,7 @@ class PGDatabase:
             self.__c.execute(f'DELETE FROM {self.__template_prompt_tb_nm} WHERE id={id}')
             self.__conn.commit()
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with deleteTemplatePrompt: {e}")
             raise
 
     def __createInfo(self):
@@ -398,7 +416,8 @@ class PGDatabase:
     def __createConv(self):
         try:
             # Check if the table exists
-            self.__c.execute(f"SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{self.__conv_tb_nm}'")
+            self.__c.execute(f'''SELECT COUNT(*) FROM information_schema.tables WHERE table_type = 'BASE TABLE'
+            AND table_schema = 'public' AND table_name = '{self.__conv_tb_nm}';''')
             if self.__c.fetchone()[0] != 1:
                 # Create a table with update_dt and insert_dt columns
                 self.__c.execute(f'''CREATE TABLE {self.__conv_tb_nm}
@@ -407,15 +426,21 @@ class PGDatabase:
                               update_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                               insert_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
                 # Create a trigger to update the update_dt column with the current timestamp
-                self.__c.execute(f'''CREATE OR REPLACE FUNCTION {self.__conv_tb_tr_nm}()
-                             RETURNS trigger AS
-                             $$
-                                 BEGIN
-                                   UPDATE {self.__conv_tb_nm}
-                                   SET update_dt=CURRENT_TIMESTAMP
-                                   WHERE id=OLD.id;
-                                 END;
-                            $$ LANGUAGE 'plpgsql';''')
+                self.__c.execute(f'''
+                                CREATE OR REPLACE FUNCTION update_conv_tb_update_dt()
+                                RETURNS TRIGGER AS $$
+                                BEGIN
+                                    NEW.update_dt = CURRENT_TIMESTAMP;
+                                    RETURN NEW;
+                                END;
+                                $$ LANGUAGE plpgsql;
+                                
+                                CREATE TRIGGER {self.__conv_tb_tr_nm}
+                                AFTER UPDATE ON {self.__conv_tb_nm}
+                                FOR EACH ROW
+                                WHEN (OLD.* IS DISTINCT FROM NEW.*)
+                                EXECUTE FUNCTION update_conv_tb_update_dt();''')
+
                 # Commit the transaction
                 self.__conn.commit()
         except psycopg2.Error as e:
@@ -429,9 +454,8 @@ class PGDatabase:
         """
         try:
             # filter bool type fields
-            self.__c.execute(f"SELECT * FROM information_schema.columns WHERE table_name='{self.__info_tb_nm}';")
-            res = self.__c.fetchall()
-            bool_type_column = [row[3] for row in res if row[7] == 'BOOL']
+            bool_type_column = [row[1] for row in self.__c.execute(f'''SELECT column_name, data_type, is_nullable, column_default
+            FROM information_schema.columns WHERE table_name = '{self.__info_tb_nm}';''').fetchall() if row[2] == 'BOOL']
 
             # Execute the SELECT statement
             self.__c.execute(f'SELECT {",".join(list(self.__chat_default_value.keys()))} FROM {self.__info_tb_nm}')
@@ -471,8 +495,6 @@ class PGDatabase:
             res = self.__c.fetchall()
             bool_type_column = [row[3] for row in res if row[7] == 'BOOL']
             # Execute the SELECT statement
-            print(
-                f'SELECT {",".join(list(self.__each_info_dict[id][1].keys()))} FROM {self.__each_info_dict[id][0]};')
             self.__c.execute(
                 f'SELECT {",".join(list(self.__each_info_dict[id][1].keys()))} FROM {self.__each_info_dict[id][0]};')
             # Get the column names
@@ -492,10 +514,10 @@ class PGDatabase:
 
     def updateInfo(self, id, field, value):
         try:
-            self.__c.execute(f"UPDATE {self.__each_info_dict[id][0]} SET {field}=('{value}') WHERE id=1")
+            self.__c.execute(f"UPDATE {self.__each_info_dict[id][0]} SET {field}=('{value}') WHERE id=1;")
             self.__conn.commit()
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with updateInfo: {e}")
             raise
 
     def selectAllConv(self):
@@ -503,10 +525,10 @@ class PGDatabase:
         select all conv
         """
         try:
-            self.__c.execute(f'SELECT * FROM {self.__conv_tb_nm}')
+            self.__c.execute(f'SELECT * FROM {self.__conv_tb_nm};')
             return self.__c.fetchall()
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with selectAllConv: {e}")
             raise
 
     def selectConv(self, id):
@@ -514,45 +536,49 @@ class PGDatabase:
         select specific conv
         """
         try:
-            self.__c.execute(f'SELECT * FROM {self.__conv_tb_nm} WHERE id={id}')
+            self.__c.execute(f'SELECT * FROM {self.__conv_tb_nm} WHERE id={id};')
             return self.__c.fetchone()
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with selectConv: {e}")
             raise
 
     def insertConv(self, name):
         try:
             # Insert a row into the table
-            self.__c.execute(f"INSERT INTO {self.__conv_tb_nm} (name) VALUES ('{name}')")
-            new_id = self.__c.lastrowid
+            self.__c.execute(f"INSERT INTO {self.__conv_tb_nm} (name) VALUES ('{name}') RETURNING id;")
+            # new_id = self.__c.lastrowid
+            new_id = self.__c.fetchone()[0]
             # Commit the transaction
             self.__conn.commit()
             self.__createConvUnit(new_id)
+            return new_id
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with insertConv: {e}")
             raise
 
     def updateConv(self, id, name):
         try:
-            self.__c.execute(f"UPDATE {self.__conv_tb_nm} SET name=('{name}') WHERE id={id}")
+            print(f"UPDATE {self.__conv_tb_nm} SET name=('{name}') WHERE id={id};")
+            self.__c.execute(f"UPDATE {self.__conv_tb_nm} SET name=('{name}') WHERE id={id};")
             self.__conn.commit()
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with updateConv: {e}")
             raise
 
     def deleteConv(self, id):
         try:
-            self.__c.execute(f'DELETE FROM {self.__conv_tb_nm} WHERE id={id}')
+            self.__c.execute(f'DELETE FROM {self.__conv_tb_nm} WHERE id={id};')
             self.__conn.commit()
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with deleteConv: {e}")
             raise
 
     def __createConvUnit(self, id_fk):
         try:
             # Check if the table exists
             self.__c.execute(
-                f"SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{self.__conv_unit_tb_nm}{id_fk}'")
+                f'''SELECT COUNT(*) FROM information_schema.tables WHERE table_type = 'BASE TABLE'
+                AND table_name = '{self.__conv_unit_tb_nm}{id_fk}';''')
             if self.__c.fetchone()[0] != 1:
                 self.__c.execute(f'''CREATE TABLE {self.__conv_unit_tb_nm}{id_fk}
                                          (id SERIAL PRIMARY KEY,
@@ -565,51 +591,71 @@ class PGDatabase:
 
                 # insert trigger
                 self.__c.execute(f'''
-                    CREATE OR REPLACE FUNCTION conv_tb_updated_by_unit_inserted_tr{id_fk}()
-                    RETURNS trigger AS
-                    $$
+                    CREATE OR REPLACE FUNCTION conv_tb_updated_by_unit_inserted_tr()
+                    RETURNS TRIGGER AS $$
                     BEGIN
-                      UPDATE {self.__conv_tb_nm} SET update_dt = CURRENT_TIMESTAMP WHERE id = NEW.id_fk;
-                    END
-                   $$ LANGUAGE 'plpgsql';''')
+                        UPDATE {self.__conv_tb_nm} SET update_dt = CURRENT_TIMESTAMP WHERE id = NEW.id_fk;
+                        RETURN NEW;
+                    END;
+                    $$ LANGUAGE plpgsql;
+                    
+                    CREATE TRIGGER conv_tb_updated_by_unit_inserted_tr{id_fk}
+                    AFTER INSERT ON {self.__conv_unit_tb_nm}{id_fk}
+                    FOR EACH ROW
+                    EXECUTE FUNCTION conv_tb_updated_by_unit_inserted_tr();
+                    ''')
+
                 # update trigger
                 self.__c.execute(f'''
-                    CREATE OR REPLACE FUNCTION conv_tb_updated_by_unit_updated_tr{id_fk}()
-                    RETURNS trigger AS
-                    $$
-                    BEGIN
-                      UPDATE {self.__conv_tb_nm} SET update_dt = CURRENT_TIMESTAMP WHERE id = NEW.id_fk;
-                    END
-                    $$ LANGUAGE 'plpgsql';''')
+                CREATE OR REPLACE FUNCTION conv_tb_updated_by_unit_updated_tr()
+                RETURNS TRIGGER AS $$
+                BEGIN
+                    UPDATE {self.__conv_tb_nm} SET update_dt = CURRENT_TIMESTAMP WHERE id = NEW.id_fk;
+                    RETURN NEW;
+                END;
+                $$ LANGUAGE plpgsql;
+                
+                CREATE TRIGGER conv_tb_updated_by_unit_updated_tr{id_fk}
+                AFTER UPDATE ON {self.__conv_unit_tb_nm}{id_fk}
+                FOR EACH ROW
+                EXECUTE FUNCTION conv_tb_updated_by_unit_updated_tr();
+                ''')
 
                 # delete trigger
                 self.__c.execute(f'''
-                    CREATE OR REPLACE FUNCTION conv_tb_updated_by_unit_deleted_tr{id_fk}()
-                    RETURNS trigger AS
-                    $$
-                    BEGIN
-                      UPDATE {self.__conv_tb_nm} SET update_dt = CURRENT_TIMESTAMP WHERE id = OLD.id_fk;
-                    END
-                    $$ LANGUAGE 'plpgsql';''')
+                CREATE OR REPLACE FUNCTION conv_tb_updated_by_unit_deleted_tr()
+                RETURNS TRIGGER AS $$
+                BEGIN
+                    UPDATE {self.__conv_tb_nm} SET update_dt = CURRENT_TIMESTAMP WHERE id = OLD.id_fk;
+                    RETURN OLD;
+                END;
+                $$ LANGUAGE plpgsql;
+                
+                CREATE TRIGGER conv_tb_updated_by_unit_deleted_tr{id_fk}
+                AFTER DELETE ON {self.__conv_unit_tb_nm}{id_fk}
+                FOR EACH ROW
+                EXECUTE FUNCTION conv_tb_updated_by_unit_deleted_tr();
+                  ''')
+
                 # Commit the transaction
                 self.__conn.commit()
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with __createConvUnit: {e}")
             raise
 
     def selectConvUnit(self, id):
-        self.__c.execute(f'SELECT * FROM {self.getConvUnitTableName()}{id}')
+        self.__c.execute(f'SELECT * FROM {self.getConvUnitTableName()}{id};')
         return [elem[3] for elem in self.__c.fetchall()]
 
     def insertConvUnit(self, id, user_f, conv):
         try:
             # Insert a row into the table
             self.__c.execute(
-                f"INSERT INTO {self.__conv_unit_tb_nm}{id} (id_fk, is_user, conv) VALUES ('{id}','{user_f}', '{conv}')")
+                f"INSERT INTO {self.__conv_unit_tb_nm}{id} (id_fk, is_user, conv) VALUES ('{id}','{user_f}', '{conv}');")
             # Commit the transaction
             self.__conn.commit()
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with insertConvUnit: {e}")
             raise
 
     def setModelType(self, model_type: int):
@@ -626,9 +672,9 @@ class PGDatabase:
         placeholders = ','.join('?' for _ in ids)
         cursor = conn.cursor()
         for i in range(len(ids)):
-            delete_conv_q = f"DELETE FROM {self.__conv_tb_nm} WHERE id in ({placeholders})"
+            delete_conv_q = f"DELETE FROM {self.__conv_tb_nm} WHERE id in ({placeholders});"
             cursor.execute(delete_conv_q, ids)
-            drop_conv_unit_tb_q = f"DROP TABLE {self.__conv_unit_tb_nm}{ids[i]}"
+            drop_conv_unit_tb_q = f"DROP TABLE {self.__conv_unit_tb_nm}{ids[i]};"
             cursor.execute(drop_conv_unit_tb_q)
             conn.commit()
 
@@ -648,11 +694,11 @@ class PGDatabase:
                         # Insert a row into the table
                         self.__c.execute(
                             f"INSERT INTO {self.__conv_unit_tb_nm}{id} (id_fk, is_user, conv) VALUES ('{id}',"
-                            f"'{i % 2 == 0}', '{conv_data[i]}')")
+                            f"'{i % 2 == 0}', '{conv_data[i]}');")
                         # Commit the transaction
                         self.__conn.commit()
         except psycopg2.Error as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred with convertJsonIntoSql: {e}")
             raise
 
     def getCursor(self):
