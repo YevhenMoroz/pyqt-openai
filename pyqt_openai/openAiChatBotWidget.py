@@ -211,6 +211,7 @@ class OpenAIChatBotWidget(QWidget):
             # "assistant" below is for making the AI remember the last question
             openai_arg = {
                 'model': info_dict['engine'],
+                'organization':'org-HB4ZBcBRZNyiWM3DuWy7uTWw',
                 'messages': [
                     {"role": "system", "content": info_dict['system']},
                     {"role": "assistant", "content": self.__browser.getAllText()},

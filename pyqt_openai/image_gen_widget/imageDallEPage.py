@@ -75,6 +75,7 @@ class ImageDallEPage(QWidget):
         openai_arg = {
             "prompt": self.__promptWidget.toPlainText(),
             "n": self.__nSpinBox.value(),
+            'organization': 'org-HB4ZBcBRZNyiWM3DuWy7uTWw',
             "size": self.__sizeCmbBox.currentText()
         }
         self.__t = DallEThread(openai_arg)

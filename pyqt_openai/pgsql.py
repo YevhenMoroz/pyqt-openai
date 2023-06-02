@@ -111,6 +111,11 @@ class PGDatabase:
                                            user="postgres",
                                            password="1111",
                                            port="5432")
+            # self.__conn = psycopg2.connect(database="apssxebq",
+            #                                host="snuffleupagus.db.elephantsql.com",
+            #                                user="apssxebq",
+            #                                password="Hgx15iWs9SNv3ytLaVmBW6vwy2gnnDjO",
+            #                                port="5432")
 
             self.__conn.autocommit = True
             self.__c = self.__conn.cursor()
@@ -244,8 +249,7 @@ class PGDatabase:
         # insert default property group
         for obj in self.__prop_prompt_unit_default_value:
             lst = [id_fk] + list(tuple(obj.values()))
-            self.__c.execute(f"INSERT INTO {self.__prop_prompt_unit_tb_nm}{id_fk} (id_fk, name, text) VALUES ("
-                             f"'{tuple(lst)[0]}', '{tuple(lst)[1]}', '{tuple(lst)[2]}')")
+            self.__c.execute(f"INSERT INTO {self.__prop_prompt_unit_tb_nm}{id_fk} (id_fk, name, text) VALUES (%s,%s,%s)",(tuple(lst)))
 
         # Commit the transaction
         self.__conn.commit()
@@ -261,7 +265,7 @@ class PGDatabase:
     def insertPropPromptAttribute(self, id, name):
         try:
             # Insert a row into the table
-            self.__c.execute(f"INSERT INTO {self.__prop_prompt_unit_tb_nm}{id} (id_fk, name) VALUES ('{id}', '{name}') RETURNING id;")
+            self.__c.execute(f"INSERT INTO {self.__prop_prompt_unit_tb_nm}{id} (id_fk, name) VALUES (%s,%s) RETURNING id;",(id,name,))
             # new_id = self.__c.lastrowid
             new_id = self.__c.fetchone()[0]
             # Commit the transaction
@@ -273,7 +277,7 @@ class PGDatabase:
 
     def updatePropPromptAttribute(self, p_id, id, name, text):
         try:
-            self.__c.execute(f"UPDATE {self.__prop_prompt_unit_tb_nm}{p_id} SET name='{name}', text='{text}' WHERE id={id}")
+            self.__c.execute(f"UPDATE {self.__prop_prompt_unit_tb_nm}{p_id} SET name=%s, text=%s WHERE id={id}", (name, text))
             self.__conn.commit()
         except psycopg2.Error as e:
             print(f"An error occurred with updatePropPromptAttribute: {e}")
@@ -306,7 +310,7 @@ class PGDatabase:
     def insertPropPromptGroup(self, name):
         try:
             # Insert a row into the table
-            self.__c.execute(f"INSERT INTO {self.__prop_prompt_group_tb_nm} (name) VALUES ('{name}') RETURNING id;")
+            self.__c.execute(f"INSERT INTO {self.__prop_prompt_group_tb_nm} (name) VALUES (%s) RETURNING id;", (name,))
             # new_id = self.__c.lastrowid
             new_id = self.__c.fetchone()[0]
             # Commit the transaction
@@ -321,7 +325,7 @@ class PGDatabase:
 
     def updatePropPromptGroup(self, id, name):
         try:
-            self.__c.execute(f"UPDATE {self.__prop_prompt_group_tb_nm} SET name=('{name}') WHERE id={id}")
+            self.__c.execute(f"UPDATE {self.__prop_prompt_group_tb_nm} SET name=(%s) WHERE id={id}",(name,))
             self.__conn.commit()
         except psycopg2.Error as e:
             print(f"An error occurred with : {e}")
@@ -356,8 +360,7 @@ class PGDatabase:
 
             # insert default template set
             for obj in self.__template_prompt_default_value:
-                self.__c.execute(f"INSERT INTO {self.__template_prompt_tb_nm} (name, text) VALUES ("
-                                 f"'{tuple(obj.values())[0]}', '{tuple(obj.values())[1]}')")
+                self.__c.execute(f"INSERT INTO {self.__template_prompt_tb_nm} (name, text) VALUES (%s, %s)", tuple(obj.values()))
 
     def selectTemplatePrompt(self):
         try:
@@ -370,7 +373,7 @@ class PGDatabase:
     def insertTemplatePrompt(self, name):
         try:
             # Insert a row into the table
-            self.__c.execute(f"INSERT INTO {self.__template_prompt_tb_nm} (name, text) VALUES ('{name}', '') RETURNING id;")
+            self.__c.execute(f"INSERT INTO {self.__template_prompt_tb_nm} (name, text) VALUES (%s, %s) RETURNING id;",(name,''))
             # new_id = self.__c.lastrowid
             new_id = self.__c.fetchone()[0]
             # Commit the transaction
@@ -383,7 +386,7 @@ class PGDatabase:
     def updateTemplatePrompt(self, id, name, text):
         try:
             self.__c.execute(
-                f"UPDATE {self.__template_prompt_tb_nm} SET name=('{name}'), text=('{text}') WHERE id={id}")
+                f"UPDATE {self.__template_prompt_tb_nm} SET name=%s, text=%s WHERE id={id}",(name, text))
             self.__conn.commit()
         except psycopg2.Error as e:
             print(f"An error occurred with updateTemplatePrompt: {e}")
@@ -514,7 +517,7 @@ class PGDatabase:
 
     def updateInfo(self, id, field, value):
         try:
-            self.__c.execute(f"UPDATE {self.__each_info_dict[id][0]} SET {field}=('{value}') WHERE id=1;")
+            self.__c.execute(f"UPDATE {self.__each_info_dict[id][0]} SET {field}=(%s) WHERE id=1;",(value,))
             self.__conn.commit()
         except psycopg2.Error as e:
             print(f"An error occurred with updateInfo: {e}")
@@ -545,7 +548,7 @@ class PGDatabase:
     def insertConv(self, name):
         try:
             # Insert a row into the table
-            self.__c.execute(f"INSERT INTO {self.__conv_tb_nm} (name) VALUES ('{name}') RETURNING id;")
+            self.__c.execute(f"INSERT INTO {self.__conv_tb_nm} (name) VALUES (%s) RETURNING id;",(name,))
             # new_id = self.__c.lastrowid
             new_id = self.__c.fetchone()[0]
             # Commit the transaction
@@ -558,8 +561,7 @@ class PGDatabase:
 
     def updateConv(self, id, name):
         try:
-            print(f"UPDATE {self.__conv_tb_nm} SET name=('{name}') WHERE id={id};")
-            self.__c.execute(f"UPDATE {self.__conv_tb_nm} SET name=('{name}') WHERE id={id};")
+            self.__c.execute(f"UPDATE {self.__conv_tb_nm} SET name=(%s) WHERE id={id};",(name,))
             self.__conn.commit()
         except psycopg2.Error as e:
             print(f"An error occurred with updateConv: {e}")
@@ -650,8 +652,8 @@ class PGDatabase:
     def insertConvUnit(self, id, user_f, conv):
         try:
             # Insert a row into the table
-            self.__c.execute(
-                f"INSERT INTO {self.__conv_unit_tb_nm}{id} (id_fk, is_user, conv) VALUES ('{id}','{user_f}', '{conv}');")
+            self.__c.execute(f'INSERT INTO {self.__conv_unit_tb_nm}{id} (id_fk, is_user, conv) VALUES (%s, %s, %s)',
+                (id, user_f, conv,))
             # Commit the transaction
             self.__conn.commit()
         except psycopg2.Error as e:
@@ -693,8 +695,8 @@ class PGDatabase:
                     for i in range(len(conv_data)):
                         # Insert a row into the table
                         self.__c.execute(
-                            f"INSERT INTO {self.__conv_unit_tb_nm}{id} (id_fk, is_user, conv) VALUES ('{id}',"
-                            f"'{i % 2 == 0}', '{conv_data[i]}');")
+                            f'INSERT INTO {self.__conv_unit_tb_nm}{id} (id_fk, is_user, conv) VALUES (%s, %s, %s)',
+                            (id, i % 2 == 0, conv_data[i],))
                         # Commit the transaction
                         self.__conn.commit()
         except psycopg2.Error as e:
