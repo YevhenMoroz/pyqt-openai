@@ -21,7 +21,7 @@ if os.environ['QT_API'] == 'pyqt5' or os.environ['QT_API'] != 'pyside6':
     QGuiApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
 
 QApplication.setFont(QFont('Arial', 12))
-QApplication.setWindowIcon(QIcon('ico/openai.svg'))
+QApplication.setWindowIcon(QIcon('ico/quod_openai.svg'))
 
 
 class MainWindow(QMainWindow):
@@ -34,7 +34,7 @@ class MainWindow(QMainWindow):
         self.__settings_struct = QSettings('pyqt_openai.ini', QSettings.IniFormat)
 
     def __initUi(self):
-        self.setWindowTitle('PyQt OpenAI Chatbot')
+        self.setWindowTitle('AI Assistant')
 
         self.__openAiChatBotWidget = OpenAIChatBotWidget()
         self.__openAiChatBotWidget.notifierWidgetActivated.connect(self.show)
@@ -167,7 +167,7 @@ class MainWindow(QMainWindow):
         menu.addAction(action)
 
         tray_icon = QSystemTrayIcon(app)
-        tray_icon.setIcon(QIcon('ico/openai.svg'))
+        tray_icon.setIcon(QIcon('ico/quod_openai.svg'))
         tray_icon.activated.connect(self.__activated)
 
         tray_icon.setContextMenu(menu)
