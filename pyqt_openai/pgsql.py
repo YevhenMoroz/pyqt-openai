@@ -1,5 +1,13 @@
 import psycopg2, json, shutil
+import logging
+from psycopg2.extras import LoggingConnection
 
+logging.basicConfig(filename="pgsql.log",
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S',
+                    level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class PGDatabase:
     """
@@ -110,13 +118,14 @@ class PGDatabase:
                                            host="localhost",
                                            user="postgres",
                                            password="1111",
-                                           port="5432")
+                                           port="5432",
+                                           connection_factory=LoggingConnection)
             # self.__conn = psycopg2.connect(database="apssxebq",
             #                                host="snuffleupagus.db.elephantsql.com",
             #                                user="apssxebq",
             #                                password="Hgx15iWs9SNv3ytLaVmBW6vwy2gnnDjO",
             #                                port="5432")
-
+            self.__conn.initialize(logger)
             self.__conn.autocommit = True
             self.__c = self.__conn.cursor()
             self.__createInfo()
