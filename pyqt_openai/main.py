@@ -147,11 +147,11 @@ class MainWindow(QMainWindow):
         # create the "File" menu
         fileMenu = QMenu("File", self)
         fileMenu.addAction(self.__exitAction)
-        menubar.addMenu(fileMenu)
+        # menubar.addMenu(fileMenu)
 
         # create the "Help" menu
         helpMenu = QMenu("Help", self)
-        menubar.addMenu(helpMenu)
+        # menubar.addMenu(helpMenu)
 
         helpMenu.addAction(self.__aboutAction)
 
@@ -186,7 +186,7 @@ class MainWindow(QMainWindow):
         windowToolBar = QToolBar()
         lay = QHBoxLayout()
         windowToolBar.addAction(self.__stackAction)
-        windowToolBar.addAction(self.__customizeAction)
+        # windowToolBar.addAction(self.__customizeAction)
         windowToolBar.addAction(self.__transparentAction)
         windowToolBar.addAction(self.__showAiToolBarAction)
         windowToolBar.addAction(self.__apiAction)

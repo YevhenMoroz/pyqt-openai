@@ -17,7 +17,6 @@ ENDPOINT_DICT = {
 }
 
 def getModelEndpoint(model):
-    print(model)
     for k, v in ENDPOINT_DICT.items():
         endpoint_group = list(v)
         if model in endpoint_group:

@@ -1,8 +1,5 @@
-import json
-
 from qtpy.QtCore import Signal
-from qtpy.QtWidgets import QWidget, QCheckBox, QListWidget, QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy, QListWidgetItem, \
-    QLabel
+from qtpy.QtWidgets import QWidget, QCheckBox, QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy, QListWidgetItem
 
 from pyqt_openai.convListWidget import ConvListWidget
 from pyqt_openai.searchBar import SearchBar
@@ -45,13 +42,12 @@ class LeftSideBar(QWidget):
         self.__allCheckBox.stateChanged.connect(self.__stateChanged)
 
         lay = QHBoxLayout()
-        lay.addWidget(self.__allCheckBox)
+        # lay.addWidget(self.__allCheckBox)
         lay.addSpacerItem(QSpacerItem(10, 10, QSizePolicy.MinimumExpanding))
         lay.addWidget(self.__addBtn)
         lay.addWidget(self.__delBtn)
-        lay.addWidget(self.__saveBtn)
+        # lay.addWidget(self.__saveBtn)
         lay.setContentsMargins(0, 0, 0, 0)
-
         navWidget = QWidget()
         navWidget.setLayout(lay)
 
