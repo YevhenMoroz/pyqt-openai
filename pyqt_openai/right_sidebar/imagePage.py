@@ -1,4 +1,4 @@
-from qtpy.QtWidgets import QWidget, QComboBox, QFormLayout, \
+from qtpy.QtWidgets import QWidget, QComboBox, QTextEdit, QLabel, QVBoxLayout, QApplication, QCheckBox, QFormLayout, \
     QSpinBox, QScrollArea
 
 from pyqt_openai.pgsql import PGDatabase

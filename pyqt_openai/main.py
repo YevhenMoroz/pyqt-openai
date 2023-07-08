@@ -1,5 +1,14 @@
-import os
+import os, sys
 import openai, requests
+
+# Get the absolute path of the current script file
+script_path = os.path.abspath(__file__)
+
+# Get the root directory by going up one level from the script directory
+project_root = os.path.dirname(os.path.dirname(script_path))
+
+sys.path.insert(0, project_root)
+sys.path.insert(0, os.getcwd())  # Add the current directory as well
 
 from qtpy.QtGui import QGuiApplication, QFont, QIcon, QColor
 from qtpy.QtWidgets import QMainWindow, QToolBar, QHBoxLayout, QDialog, QLineEdit, QPushButton, QWidgetAction, QSpinBox, QLabel, QWidget, QApplication, \
@@ -12,6 +21,10 @@ from pyqt_openai.customizeDialog import CustomizeDialog
 from pyqt_openai.svgButton import SvgButton
 from pyqt_openai.image_gen_widget.imageGeneratingToolWidget import ImageGeneratingToolWidget
 from pyqt_openai.openAiChatBotWidget import OpenAIChatBotWidget
+
+# for testing pyside6
+# if you use pyside6 already, you don't have to remove the #
+# os.environ['QT_API'] = 'pyside6'
 
 QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
 QCoreApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)  # HighDPI support
@@ -175,7 +188,7 @@ class MainWindow(QMainWindow):
         tray_icon.show()
 
     def __activated(self, reason):
-        if reason == 3:
+        if reason == QSystemTrayIcon.DoubleClick:
             self.show()
 
     def __setToolBar(self):
@@ -184,7 +197,7 @@ class MainWindow(QMainWindow):
         aiTypeToolBar.addAction(self.__chooseAiAction)
 
         windowToolBar = QToolBar()
-        lay = QHBoxLayout()
+        lay = windowToolBar.layout()
         windowToolBar.addAction(self.__stackAction)
         # windowToolBar.addAction(self.__customizeAction)
         windowToolBar.addAction(self.__transparentAction)
@@ -219,7 +232,7 @@ class MainWindow(QMainWindow):
     def __setApi(self):
         try:
             api_key = self.__apiLineEdit.text()
-            response = requests.get('https://api.openai.com/v1/engines', headers={'Authorization': f'Bearer {api_key}'})
+            response = requests.get('https://api.openai.com/v1/models', headers={'Authorization': f'Bearer {api_key}'})
             f = response.status_code == 200
             self.__setAIEnabled(f)
             if f:

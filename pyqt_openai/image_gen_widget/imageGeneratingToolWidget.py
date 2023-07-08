@@ -1,15 +1,12 @@
 import sys
 
-from PyQt5.QtWidgets import QDialog
-from qtpy.QtGui import QFont
 from qtpy.QtCore import Qt, Signal
-from qtpy.QtWidgets import QApplication, QLabel, QHBoxLayout, QVBoxLayout, QFrame, QWidget
+from qtpy.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QFrame, QWidget
 from qtpy.QtWidgets import QSplitter
 
 from pyqt_openai.image_gen_widget.leftSideBar import LeftSideBar
 from pyqt_openai.image_gen_widget.rightSideBar import RightSideBar
 from pyqt_openai.image_gen_widget.viewWidget import ViewWidget
-from pyqt_openai.inputDialog import InputDialog
 from pyqt_openai.svgButton import SvgButton
 
 
@@ -103,8 +100,7 @@ class ImageGeneratingToolWidget(QWidget):
         self.__rightSideBarWidget.setEnabled(f)
 
     def __addImageGroup(self):
-        self.__db.insertConv('New Chat')
-        cur_id = self.__db.getCursor().lastrowid
+        cur_id = self.__db.insertConv('New Chat')
         self.__browser.resetChatWidget(cur_id)
         self.__leftSideBarWidget.addImageGroup(cur_id)
         self.__lineEdit.setFocus()
@@ -126,10 +122,3 @@ class ImageGeneratingToolWidget(QWidget):
         elif isinstance(arg, bytes):
             self.__viewWidget.showSdResult(arg)
             # self.__leftSideBarWidget.addImageGroup('Stable Diffusion', 'New Image Group', 0)
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    w = ImageGeneratingToolWidget()
-    w.show()
-    sys.exit(app.exec_())

@@ -34,7 +34,8 @@ class AIPlaygroundWidget(QScrollArea):
         self.__completionPage = CompletionPage(self.__db, self.__ini_etc_dict, self.__modelData)
 
         tabWidget.addTab(chatPage, 'Chat', )
-        tabWidget.addTab(self.__completionPage, 'Completion', )
+        # hide completion page for now
+        # tabWidget.addTab(self.__completionPage, 'Completion', )
         tabWidget.currentChanged.connect(self.__tabChanged)
         tabWidget.setCurrentIndex(self.__cur_idx)
 

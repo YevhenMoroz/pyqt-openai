@@ -33,7 +33,7 @@ class CompletionPage(QWidget):
     def __initUi(self):
         self.__modelComboBox = QComboBox()
         self.__modelComboBox.addItems(getCompletionModel())
-        self.__modelComboBox.setCurrentText(self.__info_dict['engine'])
+        self.__modelComboBox.setCurrentText(self.__info_dict['model'])
         self.__modelComboBox.currentTextChanged.connect(self.__modelChanged)
 
         self.__fineTuningBtn = QPushButton('Fine Tuning')
@@ -217,7 +217,7 @@ class CompletionPage(QWidget):
     def setModelInfoByModel(self, init_model: bool = False):
         if init_model:
             self.__modelData.setModelData()
-        self.__modelTable.setModelInfo(self.__modelData.getModelData(), self.__info_dict['engine'], 'allow_fine_tuning')
+        self.__modelTable.setModelInfo(self.__modelData.getModelData(), self.__info_dict['model'], 'allow_fine_tuning')
         self.__fineTuningBtn.setEnabled(self.__modelTable.getModelInfo())
 
     def __findData(self):
@@ -259,9 +259,9 @@ class CompletionPage(QWidget):
         # subprocess.run('openai api fine_tunes.cancel -i [YOUR_FINE_TUNE_JOB_ID]')
 
     def __modelChanged(self, v):
-        self.__info_dict['engine'] = v
+        self.__info_dict['model'] = v
         self.setModelInfoByModel()
-        self.__db.updateInfo(2, 'engine', v)
+        self.__db.updateInfo(2, 'model', v)
 
     def __rememberPastConversationChkBoxToggled(self, f):
         self.__settings_struct.setValue('REMEMBER_PAST_CONVERSATION', str(int(f)))
