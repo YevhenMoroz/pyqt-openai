@@ -1,11 +1,11 @@
 from qtpy.QtWidgets import QWidget, QComboBox, QTextEdit, QLabel, QVBoxLayout, QApplication, QCheckBox, QFormLayout, \
     QSpinBox, QScrollArea
 
-from pyqt_openai.pgsql import PGDatabase
+from pyqt_openai.sqlite import SqliteDatabase
 
 
 class ImagePage(QScrollArea):
-    def __init__(self, db: PGDatabase):
+    def __init__(self, db: SqliteDatabase):
         super().__init__()
         self.__initVal(db)
         self.__initUi()

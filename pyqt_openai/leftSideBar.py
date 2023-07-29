@@ -1,5 +1,8 @@
+import json
+
 from qtpy.QtCore import Signal
-from qtpy.QtWidgets import QWidget, QCheckBox, QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy, QListWidgetItem
+from qtpy.QtWidgets import QWidget, QCheckBox, QListWidget, QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy, QListWidgetItem, \
+    QLabel
 
 from pyqt_openai.convListWidget import ConvListWidget
 from pyqt_openai.searchBar import SearchBar

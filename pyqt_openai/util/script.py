@@ -5,6 +5,7 @@ import zipfile
 
 from jinja2 import Template
 
+from pyqt_openai.sqlite import SqliteDatabase
 
 
 def get_generic_ext_out_of_qt_ext(text):

@@ -594,6 +594,7 @@ class PGDatabase:
     def deletePropPromptGroup(self, id):
         try:
             self.__c.execute(f'DELETE FROM {self.__prop_prompt_group_tb_nm} WHERE id={id}')
+            self.__c.execute(f'DROP TABLE {self.__prop_prompt_unit_tb_nm}{id}')
             self.__conn.commit()
         except psycopg2.Error as e:
             print(f"An error occurred: {e}")
@@ -758,6 +759,7 @@ class PGDatabase:
         if id == 0: id = 1
         try:
             self.__c.execute(f'DELETE FROM {self.__template_prompt_group_tb_nm} WHERE id={id};')
+            self.__c.execute(f'DROP TABLE {self.__template_prompt_tb_nm}{id};')
             self.__conn.commit()
         except psycopg2.Error as e:
             print(f"An error occurred: {e}")
@@ -1032,6 +1034,7 @@ class PGDatabase:
     def deleteConv(self, id):
         try:
             self.__c.execute(f'DELETE FROM {self.__conv_tb_nm} WHERE id={id};')
+            self.__c.execute(f'DROP TABLE {self.__conv_unit_tb_nm}{id};')
             self.__conn.commit()
         except psycopg2.Error as e:
             print(f"An error occurred with deleteConv: {e}")

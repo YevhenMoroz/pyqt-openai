@@ -1,3 +1,6 @@
+from datetime import datetime
+
+from qtpy.QtGui import QFont
 from qtpy.QtCore import Qt, Signal
 from qtpy.QtWidgets import QListWidget, QDialog, QListWidgetItem, QLabel, QHBoxLayout, QWidget, QApplication, QVBoxLayout
 
@@ -92,9 +95,7 @@ class ConvListWidget(QListWidget):
     def addConv(self, text: str, id: int):
         item = QListWidgetItem()
         item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
-        # add check boxes for not default conv
-        if id > 2:
-            item.setCheckState(Qt.Unchecked)
+        item.setCheckState(Qt.Unchecked)
         widget = ConvItemWidget(text, item, id)
         widget.convUpdated.connect(self.convUpdated)
         item.setSizeHint(widget.sizeHint())
